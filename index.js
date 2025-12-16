@@ -1,3 +1,5 @@
+// backend/server.js
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -7,7 +9,9 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+}));
 app.use(express.json());
 
 // MongoDB URI
@@ -19,47 +23,41 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    console.log("✅ MongoDB Connected");
+    console.log("✅ MongoDB Connected Successfully");
 
-    const db = client.db(process.env.DB_NAME);
-    const lessonsCollection = db.collection("lessons");
+    const db = client.db(process.env.DB_NAME || "LessonsDB");
 
     // Test route
     app.get("/", (req, res) => {
-      res.send("Backend server is running 🚀");
+      res.send("Student Life Lessons Backend is running with MongoDB 🚀");
     });
 
-    // GET all lessons
-    app.get("/lessons", async (req, res) => {
-      try {
-        const lessons = await lessonsCollection.find().toArray();
-        res.json(lessons);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    });
+   // Routes import করা – modular way
+app.use("/api/users", require("./routes/Users"));          
+app.use("/api/lessons", require("./routes/lessonRoutes"));      
 
-    // POST new lesson
-    app.post("/lessons", async (req, res) => {
-      try {
-        const lesson = req.body;
-        const result = await lessonsCollection.insertOne(lesson);
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    });
-
+// 404 handler – path ছাড়া
+app.use((req, res) => {
+  res.status(404).json({ message: "API route not found" });
+}); 
   } catch (error) {
-    console.error(error);
+    console.error("❌ MongoDB Connection Failed:", error);
+    process.exit(1);
   }
 }
 
-run();
+run().catch(console.dir);
 
+// Server start
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
+  console.log(`Visit: http://localhost:${port}`);
 });
 
-// test change
-  
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("\nShutting down server...");
+  await client.close();
+  console.log("MongoDB connection closed.");
+  process.exit(0);
+});
