@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const admin = require('../firebaseAdmin'); // ensure firebaseAdmin initialized
 
 const verifyToken = async (req, res, next) => {
@@ -19,3 +20,27 @@ const verifyToken = async (req, res, next) => {
 };
 
 module.exports = verifyToken;
+=======
+const admin = require("firebase-admin");
+
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const token = authHeader.split("Bearer ")[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    console.error("Token verify failed:", error);
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+module.exports = verifyToken;
+>>>>>>> 55e7c2daa198ec1d0499a120b7112bdc42283680
