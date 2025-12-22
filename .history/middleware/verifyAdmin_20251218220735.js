@@ -17,8 +17,6 @@ const verifyAdmin = async (req, res, next) => {
     const user = await usersCollection.findOne({ firebaseUid: uid });
     await client.close();
 
-    
-
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ message: 'Admin access required' });
     }

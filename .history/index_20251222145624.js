@@ -7,21 +7,18 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // -------------------- Middleware --------------------
-
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",                 
-      "http://localhost:3000",                  
-      "https://student-life-lessons.web.app",   
-      "https://student-life-lessons.firebaseapp.com"  
-    ],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
 
-
- 
+/**
+ * ✅ Stripe Webhook
+ * ⚠️ Stripe webhook-এর জন্য RAW body দরকার
+ * তাই json middleware এর আগে রাখতে হবে
+ */
 app.use(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" })
@@ -56,7 +53,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // await client.connect();  // তুমি কমেন্ট করে রেখেছ, ঠিক আছে যদি রাউটে কানেক্ট করো
+    await client.connect();
     console.log("✅ MongoDB Connected Successfully");
 
     // -------------------- Test Route --------------------
