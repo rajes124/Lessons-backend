@@ -14,7 +14,7 @@ const {
 } = require("../controllers/adminController");
 const verifyToken = require("../middleware/verifyToken");
 
-// connectDB import
+// তোমার connectDB import করা
 const connectDB = require("../config/db");
 require("dotenv").config();
 
@@ -23,7 +23,7 @@ const dbName = process.env.DB_NAME || "studentLifeDB";
 // Admin check middleware
 const adminOnly = async (req, res, next) => {
   try {
-    const db = await connectDB(); // connectDB 
+    const db = await connectDB(); // connectDB ব্যবহার করা
     const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ firebaseUid: req.user.uid });

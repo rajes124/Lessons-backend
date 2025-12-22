@@ -14,16 +14,18 @@ const {
 } = require("../controllers/adminController");
 const verifyToken = require("../middleware/verifyToken");
 
-// connectDB import
-const connectDB = require("../config/db");
+// 🔥 এই দুইটা import করলাম index.js থেকে
+const { MongoClient } = require("mongodb");
 require("dotenv").config();
 
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri);
 const dbName = process.env.DB_NAME || "studentLifeDB";
-
 // Admin check middleware
 const adminOnly = async (req, res, next) => {
   try {
-    const db = await connectDB(); // connectDB 
+    await client.connect();
+    const db = client.db(dbName);
     const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ firebaseUid: req.user.uid });
@@ -35,6 +37,8 @@ const adminOnly = async (req, res, next) => {
   } catch (error) {
     console.error("Admin middleware error:", error);
     res.status(500).json({ message: "Server error" });
+  } finally {
+    await client.close();
   }
 };
 

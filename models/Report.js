@@ -1,16 +1,26 @@
-<<<<<<< HEAD
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const { MongoClient, ObjectId } = require("mongodb");
 
-const reportSchema = new mongoose.Schema({
-  lessonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson', required: true },
-  reporterId: String,
-  reason: { type: String, required: true },
-}, { timestamps: true });
+const client = new MongoClient(process.env.MONGO_URI);
+const dbName = process.env.DB_NAME || "LessonsDB";
 
-module.exports = mongoose.model('Report', reportSchema);
-=======
-// add report
+// ===================== Report Schema (Mongoose) =====================
+const reportSchema = new mongoose.Schema(
+  {
+    lessonId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Lesson",
+      required: true,
+    },
+    reporterId: String,
+    reason: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
+const Report = mongoose.model("Report", reportSchema);
+
+// ===================== Add Report Controller =====================
 const addReport = async (req, res) => {
   try {
     const reporterId = req.user.uid;
@@ -25,18 +35,24 @@ const addReport = async (req, res) => {
     const reportsCollection = db.collection("reports");
 
     const report = {
-      lessonId,
+      lessonId: new ObjectId(lessonId),
       reporterId,
       reason,
       createdAt: new Date(),
     };
 
     await reportsCollection.insertOne(report);
+
     res.json({ message: "Report submitted" });
   } catch (error) {
+    console.error("Add report error:", error);
     res.status(500).json({ message: "Server Error" });
   } finally {
     await client.close();
   }
 };
->>>>>>> 55e7c2daa198ec1d0499a120b7112bdc42283680
+
+module.exports = {
+  Report,
+  addReport,
+};

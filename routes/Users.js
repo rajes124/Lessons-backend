@@ -8,9 +8,7 @@ const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 const dbName = process.env.DB_NAME || "LessonsDB";
 
-/* =========================
-   GET user by firebaseUid
-   ========================= */
+
 router.get("/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
@@ -35,9 +33,8 @@ router.get("/:uid", async (req, res) => {
   }
 });
 
-/* =========================
-   CREATE user (Firebase login এর পর)
-   ========================= */
+
+   
 router.post("/create", async (req, res) => {
   try {
     const { firebaseUid, name, email, photoURL } = req.body;
@@ -52,7 +49,7 @@ router.post("/create", async (req, res) => {
     const db = client.db(dbName);
     const usersCollection = db.collection("users");
 
-    // আগেই user থাকলে আবার create করবে না
+    
     const existing = await usersCollection.findOne({ firebaseUid });
     if (existing) {
       return res.json({
@@ -94,7 +91,7 @@ router.put("/:uid", verifyToken, async (req, res) => {
     const { uid } = req.params;
     const { name, photoURL } = req.body;
 
-    // শুধু নিজের profile update করতে পারবে
+  
     if (req.user.uid !== uid) {
       return res
         .status(403)

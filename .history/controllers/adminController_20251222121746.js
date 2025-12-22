@@ -1,6 +1,6 @@
 // backend/controllers/adminController.js
 
-const connectDB = require("../config/db"); 
+const connectDB = require("../config/db"); // <--- এই লাইনটা যোগ করো (অবশ্যই!)
 const { ObjectId } = require('mongodb');
 
 require('dotenv').config();
@@ -10,7 +10,7 @@ const dbName = process.env.DB_NAME || 'LessonsDB';
 // Get All Users
 const getAllUsers = async (req, res) => {
   try {
-    const db = await connectDB(); 
+    const db = await connectDB(); // <--- এখানে তোমার connectDB ব্যবহার করো
     const usersCollection = db.collection('users');
     const users = await usersCollection.find({}).toArray();
 

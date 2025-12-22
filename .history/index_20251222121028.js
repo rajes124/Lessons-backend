@@ -1,11 +1,11 @@
-// backend/index.js
+// backend/server.js
 
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
-// ADD: Stripe init 
+// 🔥 ADD: Stripe init (env থেকে key নিচ্ছে)
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -19,7 +19,7 @@ app.use(
   })
 );
 
-
+// ⚠️ Normal API গুলোর জন্য
 app.use(express.json());
 
 // -------------------- Routes Import --------------------
@@ -27,7 +27,7 @@ const lessonRoutes = require("./routes/lessonRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
-//  ADD: Stripe routes
+// 🔥 ADD: Stripe routes
 app.use("/api/stripe", require("./routes/stripeRoutes"));
 
 // -------------------- MongoDB --------------------
@@ -46,9 +46,9 @@ async function run() {
     await client.connect();
     console.log("✅ MongoDB Connected Successfully");
 
-    //  ADD: users collection
+    // 🔥 ADD: users collection
     const usersCollection = client
-      .db("studentLifeDB") //  DB 
+      .db("studentLifeDB") // ⚠️ তোমার DB নাম
       .collection("users");
 
     // -------------------- Test Route --------------------
@@ -66,7 +66,7 @@ async function run() {
       res.status(404).json({ message: "API route not found" });
     });
 
-    
+    // 🔥 এখানে সার্ভার শুরু করো (connection হওয়ার পর)
     app.listen(port, () => {
       console.log(`🚀 Server running on port ${port}`);
     });

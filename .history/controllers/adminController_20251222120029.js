@@ -1,19 +1,23 @@
 // backend/controllers/adminController.js
 
-const connectDB = require("../config/db"); 
-const { ObjectId } = require('mongodb');
-
+const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
+// তোমার connectDB import করা হলো — এটা দিয়ে connection stable থাকবে
+const connectDB = require("../config/db");
+
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri);
 const dbName = process.env.DB_NAME || 'LessonsDB';
 
 // Get All Users
 const getAllUsers = async (req, res) => {
   try {
-    const db = await connectDB(); 
+    const db = await connectDB();
     const usersCollection = db.collection('users');
     const users = await usersCollection.find({}).toArray();
 
+    // _id বাদ দিয়ে clean data পাঠাও
     const cleanUsers = users.map(({ _id, ...user }) => user);
     res.json(users); 
     
@@ -26,7 +30,7 @@ const getAllUsers = async (req, res) => {
 // Update User Role
 const updateUserRole = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // firebaseUid
     const { role } = req.body;
 
     if (!['user', 'admin'].includes(role)) {
@@ -55,7 +59,7 @@ const updateUserRole = async (req, res) => {
 // Delete User
 const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // firebaseUid
 
     const db = await connectDB();
     const usersCollection = db.collection('users');
@@ -63,11 +67,13 @@ const deleteUser = async (req, res) => {
     const favoritesCollection = db.collection('favorites');
     const commentsCollection = db.collection('comments');
 
+    // User delete
     const result = await usersCollection.deleteOne({ firebaseUid: id });
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // User-এর lessons, favorites, comments delete
     await lessonsCollection.deleteMany({ creatorId: id });
     await favoritesCollection.deleteMany({ userId: id });
     await commentsCollection.deleteMany({ userId: id });
@@ -142,11 +148,11 @@ const deleteLessonAdmin = async (req, res) => {
   }
 };
 
-// Get Reported Lessons
+// Get Reported Lessons (যদি reports collection থাকে)
 const getReportedLessons = async (req, res) => {
   try {
     const db = await connectDB();
-    const reportsCollection = db.collection('reports');
+    const reportsCollection = db.collection('reports'); // তোমার collection নাম same
     const lessonsCollection = db.collection('lessons');
 
     const reports = await reportsCollection.aggregate([
