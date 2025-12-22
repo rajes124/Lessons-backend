@@ -9,7 +9,7 @@ let dbConnection;
 
 const connectDB = async () => {
   if (dbConnection) {
-    return dbConnection; 
+    return dbConnection; // Already connected, return existing
   }
 
   try {
