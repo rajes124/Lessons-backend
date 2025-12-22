@@ -199,7 +199,7 @@ const addLesson = async (req, res) => {
   }
 };
 
-// ---------------------- Public Lessons ----------------------
+
 // ---------------------- Public Lessons ----------------------
 const getPublicLessons = async (req, res) => {
   try {
@@ -279,32 +279,47 @@ const getLessonDetails = async (req, res) => {
     const lessonId = req.params.id;
     const userId = req.user?.uid;
 
-    if (!ObjectId.isValid(lessonId))
+    if (!ObjectId.isValid(lessonId)) {
       return res.status(400).json({ message: 'Invalid lesson ID' });
+    }
 
     const db = await connectDB();
     const lessonsCollection = db.collection('lessons');
     const usersCollection = db.collection('users');
 
-    const lesson = await lessonsCollection.findOne({ _id: new ObjectId(lessonId) });
-    if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
-
-    const currentUser = userId ? await usersCollection.findOne({ firebaseUid: userId }) : null;
-    const isPremium = currentUser?.isPremium || false;
-
-    // FIX: case-insensitive
-    if (lesson.accessLevel?.toLowerCase() === 'premium' && !isPremium && lesson.creatorId !== userId) {
-      return res.status(403).json({ message: 'Upgrade to Premium to view this lesson' });
+    const lesson = await lessonsCollection.findOne({
+      _id: new ObjectId(lessonId),
+    });
+    if (!lesson) {
+      return res.status(404).json({ message: 'Lesson not found' });
     }
 
-    res.json({ lesson });
+    const currentUser = userId
+      ? await usersCollection.findOne({ firebaseUid: userId })
+      : null;
+
+    const isPremiumUser = currentUser?.isPremium === true;
+
+    // 🔥 FINAL & CORRECT CHECK
+    if (
+      lesson.isPremium === true &&
+      !isPremiumUser &&
+      lesson.creatorId !== userId
+    ) {
+      return res.status(403).json({
+        message: 'Upgrade to Premium to view this lesson',
+      });
+    }
+
+    res.status(200).json({ lesson });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    console.error('Lesson details error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// বাকি সব ফাংশন (তোমার অরিজিনাল কোড অক্ষত রেখে শুধু connectDB যোগ করা)
+
+ //togglelike
 
 const toggleLike = async (req, res) => {
   try {

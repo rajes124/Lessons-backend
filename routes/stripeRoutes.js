@@ -8,10 +8,14 @@ const {
 
 const router = express.Router();
 
-// Checkout session create (normal json body)
+// Checkout session create
 router.post("/create-checkout-session", createCheckoutSession);
 
 // Webhook (raw body needed for Stripe signature)
-router.post("/webhook", express.raw({ type: "application/json" }), webhookHandler);
+router.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  webhookHandler
+);
 
 module.exports = router;

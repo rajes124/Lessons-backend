@@ -1,12 +1,7 @@
-// backend/index.js
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
-
-// ADD: Stripe init 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -19,16 +14,31 @@ app.use(
   })
 );
 
+/**
+ * ✅ Stripe Webhook
+ * ⚠️ Stripe webhook-এর জন্য RAW body দরকার
+ * তাই json middleware এর আগে রাখতে হবে
+ */
+app.use(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" })
+);
 
+/**
+ * ✅ Normal JSON parser
+ * Checkout session + বাকি সব API এর জন্য
+ */
 app.use(express.json());
+
+/**
+ * ✅ Stripe Routes
+ */
+app.use("/api/stripe", require("./routes/stripeRoutes"));
 
 // -------------------- Routes Import --------------------
 const lessonRoutes = require("./routes/lessonRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-
-//  ADD: Stripe routes
-app.use("/api/stripe", require("./routes/stripeRoutes"));
 
 // -------------------- MongoDB --------------------
 const uri = process.env.MONGO_URI;
@@ -46,11 +56,6 @@ async function run() {
     await client.connect();
     console.log("✅ MongoDB Connected Successfully");
 
-    //  ADD: users collection
-    const usersCollection = client
-      .db("studentLifeDB") //  DB 
-      .collection("users");
-
     // -------------------- Test Route --------------------
     app.get("/", (req, res) => {
       res.send("Student Life Lessons Backend is running 🚀");
@@ -66,11 +71,10 @@ async function run() {
       res.status(404).json({ message: "API route not found" });
     });
 
-    
+    // -------------------- Start Server --------------------
     app.listen(port, () => {
       console.log(`🚀 Server running on port ${port}`);
     });
-
   } catch (error) {
     console.error("❌ MongoDB Connection Failed:", error);
     process.exit(1);
@@ -79,7 +83,7 @@ async function run() {
 
 run();
 
-// Graceful shutdown
+// -------------------- Graceful Shutdown --------------------
 process.on("SIGINT", async () => {
   console.log("\nShutting down server...");
   await client.close();

@@ -19,12 +19,12 @@ const createCheckoutSession = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "bdt",
+            currency: "usd",
             product_data: {
               name: "Student Life Lessons - Lifetime Premium",
               description: "One-time payment for lifetime premium access",
             },
-            unit_amount: 150000, // ৳1500 = 150000 poisha
+            unit_amount: 1500,
           },
           quantity: 1,
         },
