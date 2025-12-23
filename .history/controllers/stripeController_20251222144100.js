@@ -32,8 +32,8 @@ const createCheckoutSession = async (req, res) => {
       metadata: {
         firebaseUid: uid,
       },
-      success_url: `${process.env.FRONTEND_URL || "https://student-life-lessons.web.app"}/pricing?success=true`,
-      cancel_url: `${process.env.FRONTEND_URL || "https://student-life-lessons.web.app"}/pricing?canceled=true`,
+      success_url: `${process.env.FRONTEND_URL || "http://localhost:5173"}/pricing?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL || "http://localhost:5173"}/pricing?canceled=true`,
     });
 
     res.json({ url: session.url });
