@@ -8,36 +8,22 @@ const port = process.env.PORT || 5000;
 
 // -------------------- Middleware --------------------
 
+// Updated CORS: localhost + production URL দুটোই allow করা হয়েছে
+// credentials: true রাখা হয়েছে যদি cookie/auth লাগে
+app.use(cors({
+  origin: [
+    "http://localhost:5173",                  // তোমার local frontend (Vite/React)
+    "https://student-life-lessons.web.app",   // তোমার live frontend
+    "https://student-life-lessons.firebaseapp.com" // Firebase alternate domain
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 200  // কিছু ব্রাউজারের জন্য লাগে
+}));
 
-// app.use(cors({
-//   origin: ["https://student-life-lessons.web.app"],
-//   credentials:true
-// }));  
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://your-frontend.vercel.app",
-  "https://student-life-lessons.web.app"
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
+// Explicitly handle OPTIONS preflight for all routes (Vercel-এ নিরাপদ)
+app.options("*", cors());  // এটা অ্যাড করলে preflight সবসময় 200 দেয়
 
 // -------------------- Stripe Webhook --------------------
 app.use(
@@ -71,7 +57,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // await client.connect();
+    // await client.connect(); // Optional: যদি route এ connect করো
     console.log("✅ MongoDB Connected Successfully");
 
     // -------------------- Test Route --------------------

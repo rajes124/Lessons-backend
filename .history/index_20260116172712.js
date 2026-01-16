@@ -9,35 +9,26 @@ const port = process.env.PORT || 5000;
 // -------------------- Middleware --------------------
 
 
-// app.use(cors({
-//   origin: ["https://student-life-lessons.web.app"],
-//   credentials:true
-// }));  
+app.use(cors({
+  origin: ["https://student-life-lessons.web.app"],
+  credentials:true
+}));  
+// app.use(
+//   cors({
+//     origin: [
+//       "http://localhost:5173",
+//       "http://localhost:5000",
+//       "https://student-life-lessons.web.app",
+//       "https://student-life-lessons.firebaseapp.com"
+//     ],
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true,
+//     optionsSuccessStatus: 200 
+//   })
+// );
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://your-frontend.vercel.app",
-  "https://student-life-lessons.web.app"
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
+//app.options("*", cors());
 
 // -------------------- Stripe Webhook --------------------
 app.use(
